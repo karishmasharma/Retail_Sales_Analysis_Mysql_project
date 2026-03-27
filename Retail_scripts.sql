@@ -1,0 +1,108 @@
+SELECT * FROM Retail_Project.`sql - retail sales analysis_utf`
+limit 10;
+
+SELECT count(*) FROM Retail_Project.`sql - retail sales analysis_utf`
+;
+-- Write a SQL query to retrieve all columns for sales made on '2022-11-05'
+select *
+FROM Retail_Project.`sql - retail sales analysis_utf`
+where sale_date = '05/11/2022';
+
+-- Write a SQL query to retrieve all transactions where the category is 'Clothing' and the quantity sold is more than 4 in the month of Nov-2022:
+select distinct(sale_date)
+FROM Retail_Project.`sql - retail sales analysis_utf`
+where category= 'Clothing' 
+ and month(str_to_date(sale_date,'%d-%m-%Y'))=11;
+ 
+ DESCRIBE Retail_Project.`sql - retail sales analysis_utf`;
+ 
+ ALTER TABLE Retail_Project.`sql - retail sales analysis_utf`
+ADD COLUMN sale_date_new DATE;
+
+UPDATE Retail_Project.`sql - retail sales analysis_utf`
+SET sale_date_new = STR_TO_DATE(TRIM(sale_date), '%d/%m/%Y');
+
+SELECT sale_date,
+       STR_TO_DATE(TRIM(sale_date), '%d/%m/%Y') AS converted_date
+FROM Retail_Project.`sql - retail sales analysis_utf`
+LIMIT 20;
+
+
+SELECT *
+FROM Retail_Project.`sql - retail sales analysis_utf`
+WHERE category = 'Clothing'
+  AND MONTH(STR_TO_DATE(TRIM(sale_date), '%d/%m/%Y')) = 11
+  and quantiy >= 4;
+  
+  
+ -- Write a SQL query to calculate the total sales (total_sale) for each category.
+ 
+ select category, sum(total_sale) as Total_Sales
+ from Retail_Project.`sql - retail sales analysis_utf`
+ group by category;
+ 
+ -- Write a SQL query to find the average age of customers who purchased items from the 'Beauty' category.
+ SELECT round(avg(age),2) as Avg_age
+FROM Retail_Project.`sql - retail sales analysis_utf`
+where category='Beauty';
+
+-- Write a SQL query to find all transactions where the total_sale is greater than 1000.
+select *
+ from Retail_Project.`sql - retail sales analysis_utf`
+ where total_sale> 1000;
+ -- Write a SQL query to find the total number of transactions (transaction_id) made by each gender in each category.
+ select gender, category, count(*) as Total_trasn
+ from Retail_Project.`sql - retail sales analysis_utf`
+ group by  gender, category;
+ -- Write a SQL query to calculate the average sale for each month. Find out best selling month in each year.
+ 
+ select avg_sale,Year, Month
+ from
+ 
+ ( select avg_sale, Year, Month,
+ row_number() over (partition by Year order by avg_sale desc) as rn
+ from (
+  select round(avg(total_sale),2) as avg_sale, month(sale_date) as Month, year(sale_date) as Year
+ from Retail_Project.`sql - retail sales analysis_utf`
+ group by Year, Month) t
+ order by Year, avg_sale desc) s
+ where rn = 1;
+ 
+ 
+ ALTER TABLE Retail_Project.`sql - retail sales analysis_utf`
+Rename COLUMN sale_date_new to sale_date;
+ 
+-- Write a SQL query to find the top 5 customers based on the highest total sal
+ 
+ 
+ select customer_id, sum(total_sale) as Total_sales
+ from Retail_Project.`sql - retail sales analysis_utf`
+ group by customer_id
+ order by sum(total_sale) desc
+ limit 5;
+ 
+ -- Write a SQL query to find the number of unique customers who purchased items from each category.
+ 
+ select count(distinct customer_id) as customer, category
+ from Retail_Project.`sql - retail sales analysis_utf`
+ group by category;
+ 
+ 
+-- Write a SQL query to create each shift and number of orders (Example Morning <12, Afternoon Between 12 & 17, Evening >17).
+with hourly_sales as (
+ select *,
+    case 
+       when extract(hour from sale_time)< 12 then 'morning'
+       when extract(hour from sale_time) between 12 and 17 then 'Afternoon'
+        else 'Evening'
+        end as shift
+    from Retail_Project.`sql - retail sales analysis_utf`
+ 
+ )
+select count(*) as no_of_orders, shift
+from hourly_sales
+ group by shift;
+ 
+ 
+ 
+ 
