@@ -35,13 +35,51 @@
       group by  gender, category;
 
 
-Write a SQL query to calculate the average sale for each month. Find out best selling month in each year.
+## Write a SQL query to calculate the average sale for each month. Find out best selling month in each year.
 
-    select round(avg(total_sale),2) as avg_sale, month(sale_date) as Month
-    from Retail_Project.`sql - retail sales analysis_utf`
-    group by month(sale_date)
-    order by month(sale_date);
+     select avg_sale,Year, Month
+ from
+ ( select avg_sale, Year, Month,
+ row_number() over (partition by Year order by avg_sale desc) as rn
+ from (
+  select round(avg(total_sale),2) as avg_sale, month(sale_date) as Month, year(sale_date) as Year
+ from Retail_Project.`sql - retail sales analysis_utf`
+ group by Year, Month) t
+ order by Year, avg_sale desc) s
+ where rn = 1;
 
-Write a SQL query to find the top 5 customers based on the highest total sale.
-Write a SQL query to find the number of unique customers who purchased items from each category.
+## Write a SQL query to find the top 5 customers based on the highest total sale.
+  select customer_id, sum(total_sale) as Total_sales
+   from Retail_Project.`sql - retail sales analysis_utf`
+   group by customer_id
+   order by sum(total_sale) desc
+   limit 5;
+
+## Write a SQL query to find the number of unique customers who purchased items from each category.
+   select customer_id, sum(total_sale) as Total_sales
+   from Retail_Project.`sql - retail sales analysis_utf`
+   group by customer_id
+   order by sum(total_sale) desc
+   limit 5;
+
+
 Write a SQL query to create each shift and number of orders (Example Morning <12, Afternoon Between 12 & 17, Evening >17).
+
+select *,
+    case 
+       when extract(hour from sale_time)< 12 then 'morning'
+       when extract(hour from sale_time) between 12 and 17 then 'Afternoon'
+        else 'Evening'
+        end as shift
+    from Retail_Project.`sql - retail sales analysis_utf`
+
+
+
+
+
+
+
+
+
+
+
